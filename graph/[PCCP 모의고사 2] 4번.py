@@ -10,7 +10,6 @@
 # 아래의 코드는 효율성 테스트에서 하나도 통과를 못함. 
 # DFS 문제에서 흔히 등장하는 유형이다.... 잘 숙지해서 다시 이런 유형 안 틀리게 하자.
 
-```
 def solution(land):
     dungs = {}
     ind = 2
@@ -45,12 +44,10 @@ def solution(land):
         if res < temp: res = temp
     
     return res
-  ```
 
 # 역시 문제는 이 로직의 가장 핵심인 traverse 함수에 있었다. 
 # 기존에는 dfs 함수를 구현해서 재귀로 구현했었는데, 이 부분만 반복 dfs로 교체해주니 효율성을 전부 통과했다.
 
-```
     def traverse(x, y, ind):
         stack = [(x, y)]
         size = 0
@@ -64,7 +61,6 @@ def solution(land):
                     if 0 <= nx < len(land) and 0 <= ny < len(land[0]) and land[nx][ny] == 1:
                         stack.append((nx, ny))
         return size
-```
 
 # 두 개의 시간복잡도는 아무리 봐도 같다. 미세하게 작동 시에 차이가 있겠지만, 적나라하게 시간효율이 달라진 점은 없다.
 # 그러나 재귀의 경우는 recursion limit이 1000으로 제한되어있는 반면, BFS는 리스트를 쓰므로 그렇지 않다.
