@@ -1,4 +1,4 @@
-# https://school.programmers.co.kr/learn/courses/15009/lessons/121690
+# https://school.programmers.co.kr/learn/courses/30/lessons/250136
 
 # 재밌는 문제.
 
