@@ -6,6 +6,8 @@
 # 점프를 하는 여부에 대한 정보를 포함해서 경로를 짜줘야 한다.
 # 이것도 어찌보면 BFS를 활용한 단순 구현 문제라고 생각할 수도 있을 것 같다.
 
+# 더 좋은 답안은 없다.
+
 from collections import deque
 
 def solution(n, m, hole):    
