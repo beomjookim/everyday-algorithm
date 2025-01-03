@@ -126,3 +126,35 @@ max_score_table as (select max(total_score) max_score from score_table)
 select s.total_score score, s.emp_no, h.emp_name, h.position, h.email 
 from score_table s join max_score_table m on m.max_score = s.total_score 
 join hr_employees h on s.emp_no = h.emp_no
+
+-- 연간 평가점수에 해당하는 평가 등급 및 성과급 조회하기
+with avg_grade as (select emp_no, sum(score)/2 score from hr_grade group by emp_no),
+grades as (select emp_no, case when score >= 96 then 'S' when score >= 90 then 'A' when score >= 80 then 'B' else 'C' end grade, case when score >= 96 then 0.20 when score >= 90 then 0.15 when score >= 80 then 0.10 else 0.0 end bonus from avg_grade)
+select g.emp_no, h.emp_name, g.grade grade, g.bonus * h.sal bonus from grades g join hr_employees h on g.emp_no = h.emp_no
+order by g.emp_no
+    
+-- 부서별 평균 연봉 조회하기
+with avg_sals as (select dept_id, round(sum(sal)/count(sal)) avg_sal from hr_employees group by dept_id)
+select a.dept_id, h.dept_name_en, a.avg_sal avg_sal from avg_sals a join hr_department h on a.dept_id = h.dept_id
+order by a.avg_sal desc
+
+-- 노선별 평균 역 사이 거리 조회하기
+-- avg 집계 함수 유용히 쓰자. 그리고 str 붙이고 싶으면 concat 시전해주면 됨.
+
+select route, concat(round(sum(d_between_dist), 1),'km') total_distance, concat(round(avg(d_between_dist), 2),'km') average_distance
+from subway_distance group by route order by sum(d_between_dist) desc
+ 
+-- 물고기 종류 별 잡은 수 구하기
+select count(*) fish_count, fish_name from fish_name_info n join fish_info i on i.fish_type = n.fish_type
+group by fish_name order by count(*) desc
+ 
+-- 월별 잡은 물고기 수 구하기
+select count(*) fish_count, extract(month from time) month from fish_info group by extract(month from time)
+order by extract(month from time)
+ 
+-- 특정 조건을 만족하는 물고기별 수와 최대 길이 구하기
+with new_fish_info as 
+(select fish_type, case when length is null then 10 else length end length from fish_info)
+select count(*) fish_count, max(length) max_length, fish_type 
+from new_fish_info group by fish_type having avg(length) >= 33
+order by fish_type
