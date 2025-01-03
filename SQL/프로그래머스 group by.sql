@@ -54,3 +54,75 @@ select f.category, m.max_price, f.product_name from food_product f join max_tabl
 
 with yes_options as (select * from car_rental_company_car where options like '%시트%')
 select car_type, count(*) cars from yes_options group by car_type order by car_type
+
+-- 성분으로 구분한 아이스크림 총 주문량
+select ingredient_type, sum(total_order) total_order from icecream_info i join first_half f on f.flavor = i.flavor group by ingredient_type order by total_order
+
+-- 진료과별 총 예약 횟수 출력하기
+-- 별칭으로 사용하기 위해서는 작은 따옴표는 안되고, 큰 따옴표 혹은 백틱을 활용해야 한다고 함.
+
+-- 작은 따옴표는 string 취급 받는다고 함.
+
+select mcdp_cd as '진료과 코드', count(*) as '5월예약건수' from appointment where apnt_ymd between '2022-05-01' and '2022-05-31' group by mcdp_cd order by count(*), mcdp_cd
+
+-- 카테고리 별 도서 판매량 집계하기
+select b.category, sum(s.sales) total_sales from book b join book_sales s on b.book_id = s.book_id where s.sales_date between '2022-01-01' and '2022-01-31' group by category order by category
+
+-- 즐겨찾기가 가장 많은 식당 정보 출력하기
+with favorite_foods as (select food_type, max(favorites) favorites from rest_info group by food_type)
+select r.food_type, r.rest_id, r.rest_name, r.favorites from rest_info r 
+join favorite_foods f on r.food_type = f.food_type where r.favorites = f.favorites order by food_type desc
+
+-- 조건에 맞는 사용자와 총 거래금액 조회하기
+select u.user_id user_id, u.nickname nickname, sum(b.price) total_sales 
+from used_goods_user u join used_goods_board b on b.writer_id = u.user_id 
+where b.status = "DONE" group by u.user_id having sum(b.price) >= 700000 order by total_sales
+
+-- 고양이와 개는 몇 마리 있을까﻿
+select animal_type, count(animal_id) 
+from animal_ins group by animal_type order by animal_type
+
+-- 동명 동물 수 찾기﻿
+select name, count(name) from animal_ins group by name having count(name) > 1 order by name
+
+-- 년, 월, 성별 별 상품 구매 회원 수 구하기
+-- 재밌는 문제.
+
+-- 첫번째 풀이는 다음과 같았다. 그런데 통과를 하지 못했다.
+
+select extract(YEAR from o.sales_date) "year", 
+    extract(month from o.sales_date) "month", 
+    u.gender "gender", 
+    count(distinct u.user_id) users
+from online_sale o join user_info u on o.user_id = u.user_id 
+where u.gender is not null
+group by "year", "month", "gender" 
+order by "year", "month", "gender"
+
+-- 문제는 결국, 저 따옴표였다... 따옴표를 포함하면 어떤 이유에선지 구분이 잘 안 되고, 오히려 따옴표 없이 하니까 잘 됐다.
+
+-- 결론은, 따옴표고 뭐고 간에 그냥 GROUP BY랑 ORDER BY 해줄 때는 별칭 쓰지 말자.
+
+-- 입양 시각 구하기(1)
+
+select extract(hour from datetime), count(*) 
+from animal_outs where extract(hour from datetime) between 9 and 19 
+group by extract(hour from datetime) order by extract(hour from datetime)
+
+-- 입양 시각 구하기(2)
+-- set 함수 등을 사용하면 됨. 일단은 그냥 넘어가는 걸로,
+  
+-- 가격대 별 상품 개수 구하기
+-- 이것도 하나의 테크닉으로 보인다. floor 함수를 써서 가격대 구간을 나누는 것.
+
+select floor(price/10000)*10000 price_group, count(*) products 
+from product group by floor(price/10000)*10000 order by floor(price/10000)*10000
+
+-- 조건에 맞는 사원 정보 조회하기
+-- 새로운 테크닉 - 세 개 이상의 테이블 join 시키기.
+
+with score_table as (select emp_no, sum(score) total_score from hr_grade group by emp_no),
+max_score_table as (select max(total_score) max_score from score_table)
+select s.total_score score, s.emp_no, h.emp_name, h.position, h.email 
+from score_table s join max_score_table m on m.max_score = s.total_score 
+join hr_employees h on s.emp_no = h.emp_no
