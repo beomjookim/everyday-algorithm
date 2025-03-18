@@ -1,3 +1,5 @@
+# https://school.programmers.co.kr/learn/courses/30/lessons/43162
+
 # 처음에 모든 네트워크가 서로 다른 네트워크에 포함된다는 설정으로 훨씬 쉬워진 문제.
 # set의 union과 dict의 del 등에 대한 복기.
 
